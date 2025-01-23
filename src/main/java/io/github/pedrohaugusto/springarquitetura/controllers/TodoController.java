@@ -2,8 +2,11 @@ package io.github.pedrohaugusto.springarquitetura.controllers;
 
 import io.github.pedrohaugusto.springarquitetura.models.TodoEntity;
 import io.github.pedrohaugusto.springarquitetura.services.TodoService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -11,9 +14,7 @@ import java.util.UUID;
 @RequestMapping("todos")
 public class TodoController {
 
-
-
-    private TodoService service;
+    private final TodoService service;
 
     public TodoController(TodoService service) {
         this.service = service;
@@ -21,7 +22,12 @@ public class TodoController {
 
     @PostMapping
     public TodoEntity salvar(@RequestBody TodoEntity todo){
-        return this.service.salvar(todo);
+        try{
+            return this.service.salvar(todo);
+    } catch (IllegalArgumentException e){
+        var mensagemErro = e.getMessage();
+        throw new ResponseStatusException(HttpStatus.CONFLICT, mensagemErro);
+        }
     }
 
     @PutMapping("/{id}")
